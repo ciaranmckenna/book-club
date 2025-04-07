@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Club - Books</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Book Club</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/books">Books</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/reading-lists">My Reading Lists</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/admin">Admin</a>
+                    </li>
+                </ul>
+                <div class="navbar-nav ms-auto">
+                    <div sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/dashboard">
+                            <span sec:authentication="name"></span>
+                        </a>
+                    </div>
+                    <a class="nav-link" sec:authorize="!isAuthenticated()" href="/login">Login</a>
+                    <a class="nav-link" sec:authorize="!isAuthenticated()" href="/register">Register</a>
+                    <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link nav-link">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Books</h2>
+            <div sec:authorize="hasRole('ADMIN')">
+                <a href="/books/add" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Add New Book
+                </a>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/books}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               th:value="${param.search}" placeholder="Title, author, or ISBN">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="sort" class="form-label">Sort By</label>
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="title,asc" th:selected="${param.sort == 'title,asc'}">Title (A-Z)</option>
+                            <option value="title,desc" th:selected="${param.sort == 'title,desc'}">Title (Z-A)</option>
+                            <option value="author,asc" th:selected="${param.sort == 'author,asc'}">Author (A-Z)</option>
+                            <option value="author,desc" th:selected="${param.sort == 'author,desc'}">Author (Z-A)</option>
+                            <option value="publicationDate,desc" th:selected="${param.sort == 'publicationDate,desc'}">Newest First</option>
+                            <option value="publicationDate,asc" th:selected="${param.sort == 'publicationDate,asc'}">Oldest First</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="size" class="form-label">Items Per Page</label>
+                        <select class="form-select" id="size" name="size">
+                            <option value="10" th:selected="${param.size == '10'}">10</option>
+                            <option value="20" th:selected="${param.size == '20'}">20</option>
+                            <option value="50" th:selected="${param.size == '50'}">50</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Book List -->
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+            <div th:each="book : ${books}" class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${book.title}">Book Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted" th:text="${book.author}">Author</h6>
+                        <p class="card-text small" th:text="${#strings.abbreviate(book.description, 150)}">Description...</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Published: <span th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2023</span>
+                            </small>
+                            <span class="badge bg-secondary" th:text="${book.isbn}">ISBN</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white d-flex justify-content-between">
+                        <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                        <div sec:authorize="isAuthenticated()">
+                            <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" 
+                                    th:data-bs-target="'#addToListModal' + ${book.id}">
+                                <i class="bi bi-plus-circle"></i> Add to List
+                            </button>
+                            
+                            <!-- Modal for adding to reading list -->
+                            <div class="modal fade" th:id="'addToListModal' + ${book.id}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Add to Reading List</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form th:action="@{/reading-lists/add-book}" method="post">
+                                                <input type="hidden" name="bookId" th:value="${book.id}">
+                                                
+                                                <div class="mb-3">
+                                                    <label for="readingListId" class="form-label">Select Reading List</label>
+                                                    <select class="form-select" id="readingListId" name="readingListId" required>
+                                                        <option value="">Select a reading list</option>
+                                                        <option th:each="list : ${userReadingLists}" 
+                                                                th:value="${list.id}" 
+                                                                th:text="${list.name}">List Name</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-3 text-center">
+                                                    <span>or</span>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="newListName" class="form-label">Create New List</label>
+                                                    <input type="text" class="form-control" id="newListName" name="newListName" placeholder="New list name">
+                                                </div>
+                                                
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary">Add to Reading List</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(books)}" class="text-center py-5">
+            <i class="bi bi-journal-x" style="font-size: 48px;"></i>
+            <p class="mt-3">No books found.</p>
+            <div sec:authorize="hasRole('ADMIN')">
+                <a href="/books/add" class="btn btn-primary">Add First Book</a>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${books.totalPages > 1}" aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${books.first ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/books(page=0, size=${books.size}, sort=${param.sort}, search=${param.search})}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${books.first ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/books(page=${books.number - 1}, size=${books.size}, sort=${param.sort}, search=${param.search})}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, books.totalPages - 1)}" 
+                    th:classappend="${books.number == i ? 'active' : ''}"
+                    th:if="${i >= books.number - 2 and i <= books.number + 2}">
+                    <a class="page-link" 
+                       th:href="@{/books(page=${i}, size=${books.size}, sort=${param.sort}, search=${param.search})}" 
+                       th:text="${i + 1}">1</a>
+                </li>
+                
+                <li class="page-item" th:classappend="${books.last ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/books(page=${books.number + 1}, size=${books.size}, sort=${param.sort}, search=${param.search})}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${books.last ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/books(page=${books.totalPages - 1}, size=${books.size}, sort=${param.sort}, search=${param.search})}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="text-center mt-2" th:if="${not #lists.isEmpty(books)}">
+            <small class="text-muted">
+                Showing <span th:text="${books.numberOfElements}">10</span> of <span th:text="${books.totalElements}">100</span> books
+            </small>
+        </div>
+    </div>
+
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2023 Book Club. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
