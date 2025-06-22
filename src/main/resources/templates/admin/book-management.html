@@ -179,7 +179,7 @@
                                         <td th:text="${book.title}">Book Title</td>
                                         <td th:text="${book.author}">Author Name</td>
                                         <td th:text="${book.isbn}">123-456-789</td>
-                                        <td th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2023</td>
+                                        <td th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2025</td>
                                         <td>
                                             <div class="btn-group">
                                                 <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-sm btn-outline-primary">
@@ -429,7 +429,7 @@
                     <p>A community for book lovers to discover, share, and discuss great books.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p>&copy; 2023 Book Club. All rights reserved.</p>
+                    <p>&copy; 2025 Book Club. All rights reserved.</p>
                 </div>
             </div>
         </div>

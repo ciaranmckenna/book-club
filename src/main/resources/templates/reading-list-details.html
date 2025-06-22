@@ -102,7 +102,7 @@
                                     <a th:href="@{/books/{id}(id=${book.id})}" class="text-decoration-none" th:text="${book.title}">Book Title</a>
                                 </td>
                                 <td th:text="${book.author}">Author</td>
-                                <td th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2023</td>
+                                <td th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2025</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-outline-primary">
@@ -147,7 +147,7 @@
                         <span th:text="${#lists.size(readingList.books)}">0</span> books in this list
                     </small>
                     <small class="text-muted">
-                        Created <span th:text="${#temporals.format(readingList.createdAt, 'dd MMMM yyyy')}">01 January 2023</span>
+                        Created <span th:text="${#temporals.format(readingList.createdAt, 'dd MMMM yyyy')}">01 January 2025</span>
                     </small>
                 </div>
             </div>
@@ -178,7 +178,7 @@
 
     <footer class="bg-light py-4 mt-5">
         <div class="container text-center">
-            <p>&copy; 2023 Book Club. All rights reserved.</p>
+            <p>&copy; 2025 Book Club. All rights reserved.</p>
         </div>
     </footer>
 

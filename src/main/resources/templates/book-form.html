@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Club - Add Book</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Book Club</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/books">Books</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/reading-lists">My Reading Lists</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/admin">Admin</a>
+                    </li>
+                </ul>
+                <div class="navbar-nav ms-auto">
+                    <div sec:authorize="isAuthenticated()">
+                        <a class="nav-link" href="/dashboard">
+                            <span sec:authentication="name"></span>
+                        </a>
+                    </div>
+                    <a class="nav-link" sec:authorize="!isAuthenticated()" href="/login">Login</a>
+                    <a class="nav-link" sec:authorize="!isAuthenticated()" href="/register">Register</a>
+                    <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link nav-link">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0">
+                            <i class="bi bi-book me-2"></i>
+                            <span th:text="${isEdit ? 'Edit Book' : 'Add New Book'}">Add New Book</span>
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Alert Messages -->
+                        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <span th:text="${errorMessage}">Error message</span>
+                        </div>
+                        
+                        <form th:action="${isEdit} ? @{/books/{id}/edit(id=${bookId})} : @{/books/add}" method="post" th:object="${bookForm}">
+                            <!-- Title -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                                <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Title error</div>
+                            </div>
+                            
+                            <!-- Author -->
+                            <div class="mb-3">
+                                <label for="author" class="form-label">Author <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="author" th:field="*{author}" required>
+                                <div class="text-danger" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Author error</div>
+                            </div>
+                            
+                            <!-- ISBN -->
+                            <div class="mb-3">
+                                <label for="isbn" class="form-label">ISBN</label>
+                                <input type="text" class="form-control" id="isbn" th:field="*{isbn}" placeholder="e.g., 978-0123456789">
+                                <div class="text-danger" th:if="${#fields.hasErrors('isbn')}" th:errors="*{isbn}">ISBN error</div>
+                                <small class="form-text text-muted">Format: 978-XXXXXXXXXX (digits and hyphens only)</small>
+                            </div>
+                            
+                            <!-- Publication Date -->
+                            <div class="mb-3">
+                                <label for="publicationDate" class="form-label">Publication Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="publicationDate" th:field="*{publicationDate}" required>
+                                <div class="text-danger" th:if="${#fields.hasErrors('publicationDate')}" th:errors="*{publicationDate}">Publication date error</div>
+                            </div>
+                            
+                            <!-- Publisher (Optional) -->
+                            <div class="mb-3">
+                                <label for="publisher" class="form-label">Publisher</label>
+                                <input type="text" class="form-control" id="publisher" th:field="*{publisher}">
+                                <div class="text-danger" th:if="${#fields.hasErrors('publisher')}" th:errors="*{publisher}">Publisher error</div>
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" rows="4"></textarea>
+                                <div class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Description error</div>
+                            </div>
+                            
+                            <!-- Cover Image URL -->
+                            <div class="mb-3">
+                                <label for="coverImageUrl" class="form-label">Cover Image URL</label>
+                                <input type="url" class="form-control" id="coverImageUrl" th:field="*{coverImageUrl}" placeholder="https://example.com/book-cover.jpg">
+                                <div class="text-danger" th:if="${#fields.hasErrors('coverImageUrl')}" th:errors="*{coverImageUrl}">Cover image URL error</div>
+                            </div>
+                            
+                            <!-- Adding to Reading List (optional) -->
+                            <div class="mb-3" sec:authorize="isAuthenticated()" th:if="${!isEdit}">
+                                <label for="readingListId" class="form-label">Add to Reading List (Optional)</label>
+                                <select class="form-select" id="readingListId" name="readingListId">
+                                    <option value="">Don't add to a reading list</option>
+                                    <option th:each="list : ${userReadingLists}" 
+                                            th:value="${list.id}" 
+                                            th:text="${list.name}">List Name</option>
+                                </select>
+                                <div class="form-text">You can also create a new reading list</div>
+                                <div class="input-group mt-2">
+                                    <input type="text" class="form-control" id="newListName" name="newListName" placeholder="New list name">
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a href="/books" class="btn btn-secondary me-md-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i>
+                                    <span th:text="${isEdit ? 'Update Book' : 'Add Book'}">Add Book</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2025 Book Club. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

@@ -145,7 +145,7 @@
                                         <td>
                                             <span th:each="role : ${user.roles}" class="badge bg-secondary me-1" th:text="${role}">ROLE</span>
                                         </td>
-                                        <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2023</td>
+                                        <td th:text="${#temporals.format(user.createdAt, 'dd MMM yyyy')}">01 Jan 2025</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn btn-outline-primary">
@@ -203,7 +203,7 @@
 
     <footer class="bg-light py-4 mt-5">
         <div class="container text-center">
-            <p>&copy; 2023 Book Club. All rights reserved.</p>
+            <p>&copy; 2025 Book Club. All rights reserved.</p>
         </div>
     </footer>
 
