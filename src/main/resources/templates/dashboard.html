@@ -98,7 +98,7 @@
                                     <p class="mb-1 text-muted" th:text="${readingList.description}">Description</p>
                                     <small>
                                         <span th:text="${readingList.books != null ? readingList.books.size() : 0}">0</span> books · 
-                                        Created <span th:text="${#temporals.format(readingList.createdAt, 'dd MMM yyyy')}">01 Jan 2023</span>
+                                        Created <span th:text="${#temporals.format(readingList.createdAt, 'dd MMM yyyy')}">01 Jan 2025</span>
                                     </small>
                                 </div>
                                 <div>
@@ -132,7 +132,7 @@
                                         <h5 class="card-title" th:text="${book.title}">Book Title</h5>
                                         <h6 class="card-subtitle mb-2 text-muted" th:text="${book.author}">Author</h6>
                                         <p class="card-text small" th:if="${book.publicationDate != null}">
-                                            Published: <span th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2023</span>
+                                            Published: <span th:text="${#temporals.format(book.publicationDate, 'dd MMM yyyy')}">01 Jan 2025</span>
                                         </p>
                                         <a th:href="@{/books/{id}(id=${book.id})}" class="btn btn-sm btn-outline-primary">View Details</a>
                                     </div>
