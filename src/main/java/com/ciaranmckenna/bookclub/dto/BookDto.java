@@ -12,6 +12,7 @@ public record BookDto(
     String author,
     LocalDate publicationDate,
     String description,
+    String publisher,
     String isbn,
     String coverImageUrl
 ) {

@@ -5,13 +5,18 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /** ReadingList entity class Represents a reading list created by a user containing books */
 @Entity
 @Table(name = "reading_lists")
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"books", "user"}) // Exclude collections and relationships from toString
 public class ReadingList {
 
   @Id
@@ -44,6 +49,31 @@ public class ReadingList {
       joinColumns = @JoinColumn(name = "reading_list_id"),
       inverseJoinColumns = @JoinColumn(name = "book_id"))
   private Set<Book> books = new HashSet<>();
+
+  /**
+   * Custom hashCode implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, description, createdAt, updatedAt);
+  }
+
+  /**
+   * Custom equals implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    ReadingList that = (ReadingList) obj;
+    return Objects.equals(id, that.id) &&
+           Objects.equals(name, that.name) &&
+           Objects.equals(description, that.description) &&
+           Objects.equals(createdAt, that.createdAt) &&
+           Objects.equals(updatedAt, that.updatedAt);
+  }
 
   /**
    * Add a book to the reading list

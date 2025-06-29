@@ -7,13 +7,18 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /** Book entity class Represents a book in the system which can be added to reading lists */
 @Entity
 @Table(name = "books")
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"readingLists", "createdBy", "categories"}) // Exclude collections and relationships from toString
 public class Book {
 
   @Id
@@ -36,6 +41,9 @@ public class Book {
 
   @Column(length = 1000)
   private String description;
+
+  @Column(length = 1000)
+  private String publisher;
 
   @Column(name = "isbn", unique = true)
   private String isbn;
@@ -62,6 +70,36 @@ public class Book {
       joinColumns = @JoinColumn(name = "book_id"),
       inverseJoinColumns = @JoinColumn(name = "category_id"))
   private Set<Category> categories = new HashSet<>();
+
+  /**
+   * Custom hashCode implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, title, author, publicationDate, description, publisher, isbn, coverImageUrl, createdAt, updatedAt);
+  }
+
+  /**
+   * Custom equals implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Book book = (Book) obj;
+    return Objects.equals(id, book.id) &&
+           Objects.equals(title, book.title) &&
+           Objects.equals(author, book.author) &&
+           Objects.equals(publicationDate, book.publicationDate) &&
+           Objects.equals(description, book.description) &&
+           Objects.equals(publisher, book.publisher) &&
+           Objects.equals(isbn, book.isbn) &&
+           Objects.equals(coverImageUrl, book.coverImageUrl) &&
+           Objects.equals(createdAt, book.createdAt) &&
+           Objects.equals(updatedAt, book.updatedAt);
+  }
 
   /** PrePersist hook to set creation timestamp and creator */
   @PrePersist

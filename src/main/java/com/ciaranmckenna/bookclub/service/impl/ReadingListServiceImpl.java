@@ -361,6 +361,7 @@ public class ReadingListServiceImpl implements ReadingListService {
         book.getAuthor(),
         book.getPublicationDate(),
         book.getDescription(),
+        book.getPublisher(),
         book.getIsbn(),
         book.getCoverImageUrl());
   }
