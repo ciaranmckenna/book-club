@@ -83,6 +83,7 @@ class BookServiceTest {
             "New Author", // author
             LocalDate.of(2024, 1, 1), // publicationDate
             "Description", // description
+            "Publisher", // publisher
             "123456789", // isbn
             null // coverImageUrl
         );

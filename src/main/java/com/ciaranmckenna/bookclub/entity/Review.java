@@ -6,13 +6,18 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import lombok.Data;
+import java.util.Objects;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(
     name = "reviews",
     uniqueConstraints = @UniqueConstraint(columnNames = {"book_id", "user_id"}))
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"book", "user"}) // Exclude relationships from toString
 public class Review {
 
   @Id
@@ -42,6 +47,31 @@ public class Review {
 
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  /**
+   * Custom hashCode implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, rating, reviewText, createdAt, updatedAt);
+  }
+
+  /**
+   * Custom equals implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Review review = (Review) obj;
+    return Objects.equals(id, review.id) &&
+           Objects.equals(rating, review.rating) &&
+           Objects.equals(reviewText, review.reviewText) &&
+           Objects.equals(createdAt, review.createdAt) &&
+           Objects.equals(updatedAt, review.updatedAt);
+  }
 
   @PrePersist
   protected void onCreate() {

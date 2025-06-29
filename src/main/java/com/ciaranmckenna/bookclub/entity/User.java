@@ -6,15 +6,20 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * User entity class Represents a user in the system with authentication details and reading lists
  */
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"readingLists", "password"}) // Exclude collections and sensitive data from toString
 public class User {
 
   @Id
@@ -64,6 +69,37 @@ public class User {
   @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role")
   private Set<String> roles = new HashSet<>();
+
+  /**
+   * Custom hashCode implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, username, email, firstName, lastName, createdAt, updatedAt, enabled, resetToken, resetTokenExpiry, roles);
+  }
+
+  /**
+   * Custom equals implementation that excludes lazy-loaded collections
+   * to prevent ConcurrentModificationException during Hibernate operations
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    User user = (User) obj;
+    return enabled == user.enabled &&
+           Objects.equals(id, user.id) &&
+           Objects.equals(username, user.username) &&
+           Objects.equals(email, user.email) &&
+           Objects.equals(firstName, user.firstName) &&
+           Objects.equals(lastName, user.lastName) &&
+           Objects.equals(createdAt, user.createdAt) &&
+           Objects.equals(updatedAt, user.updatedAt) &&
+           Objects.equals(resetToken, user.resetToken) &&
+           Objects.equals(resetTokenExpiry, user.resetTokenExpiry) &&
+           Objects.equals(roles, user.roles);
+  }
 
   /**
    * Add role to user
