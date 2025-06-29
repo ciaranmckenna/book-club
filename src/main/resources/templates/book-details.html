@@ -104,14 +104,7 @@
                                     <th>Publisher:</th>
                                     <td th:text="${book.publisher}">Publisher Name</td>
                                 </tr>
-                                <tr>
-                                    <th>Language:</th>
-                                    <td th:text="${book.language}">English</td>
-                                </tr>
-                                <tr>
-                                    <th>Page Count:</th>
-                                    <td th:text="${book.pageCount + ' pages'}">300 pages</td>
-                                </tr>
+                                <!-- Removed Language and Page Count fields as BookDto does not provide them -->
                             </tbody>
                         </table>
                     </div>

@@ -46,6 +46,7 @@ public class BookFormDto {
         this.author,
         this.publicationDate,
         this.description,
+        this.publisher,
         this.isbn,
         this.coverImageUrl);
   }
@@ -62,7 +63,7 @@ public class BookFormDto {
         bookDto.author(),
         bookDto.isbn(),
         bookDto.publicationDate(),
-        null, // Publisher is not in BookDto
+        bookDto.publisher(),
         bookDto.description(),
         bookDto.coverImageUrl());
   }
