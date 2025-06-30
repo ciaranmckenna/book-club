@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -15,6 +15,7 @@ import lombok.ToString;
 @Table(name = "categories")
 @Getter
 @Setter
+@NoArgsConstructor
 @ToString(exclude = {"books"}) // Exclude collections from toString
 public class Category {
 
@@ -40,29 +41,17 @@ public class Category {
   @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
   private Set<Book> books = new HashSet<>();
 
-  /**
-   * Custom hashCode implementation that excludes lazy-loaded collections
-   * to prevent ConcurrentModificationException during Hibernate operations
-   */
   @Override
-  public int hashCode() {
-    return Objects.hash(id, name, description, createdAt, updatedAt);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Category category = (Category) o;
+    return id != null && id.equals(category.id);
   }
 
-  /**
-   * Custom equals implementation that excludes lazy-loaded collections
-   * to prevent ConcurrentModificationException during Hibernate operations
-   */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    Category category = (Category) obj;
-    return Objects.equals(id, category.id) &&
-           Objects.equals(name, category.name) &&
-           Objects.equals(description, category.description) &&
-           Objects.equals(createdAt, category.createdAt) &&
-           Objects.equals(updatedAt, category.updatedAt);
+  public int hashCode() {
+    return getClass().hashCode();
   }
 
   @PrePersist

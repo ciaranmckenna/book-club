@@ -7,9 +7,9 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -18,6 +18,7 @@ import lombok.ToString;
 @Table(name = "books")
 @Getter
 @Setter
+@NoArgsConstructor
 @ToString(exclude = {"readingLists", "createdBy", "categories"}) // Exclude collections and relationships from toString
 public class Book {
 
@@ -71,34 +72,17 @@ public class Book {
       inverseJoinColumns = @JoinColumn(name = "category_id"))
   private Set<Category> categories = new HashSet<>();
 
-  /**
-   * Custom hashCode implementation that excludes lazy-loaded collections
-   * to prevent ConcurrentModificationException during Hibernate operations
-   */
   @Override
-  public int hashCode() {
-    return Objects.hash(id, title, author, publicationDate, description, publisher, isbn, coverImageUrl, createdAt, updatedAt);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Book book = (Book) o;
+    return id != null && id.equals(book.id);
   }
 
-  /**
-   * Custom equals implementation that excludes lazy-loaded collections
-   * to prevent ConcurrentModificationException during Hibernate operations
-   */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    Book book = (Book) obj;
-    return Objects.equals(id, book.id) &&
-           Objects.equals(title, book.title) &&
-           Objects.equals(author, book.author) &&
-           Objects.equals(publicationDate, book.publicationDate) &&
-           Objects.equals(description, book.description) &&
-           Objects.equals(publisher, book.publisher) &&
-           Objects.equals(isbn, book.isbn) &&
-           Objects.equals(coverImageUrl, book.coverImageUrl) &&
-           Objects.equals(createdAt, book.createdAt) &&
-           Objects.equals(updatedAt, book.updatedAt);
+  public int hashCode() {
+    return getClass().hashCode();
   }
 
   /** PrePersist hook to set creation timestamp and creator */
